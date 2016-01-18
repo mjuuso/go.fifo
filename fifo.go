@@ -1,9 +1,9 @@
 // Created by Yaz Saito on 06/15/12.
 // Modified by Geert-Johan Riemer, Foize B.V.
+// Further additions by Miiro Juuso, Artirix Limited
 
 // TODO:
 // - travis CI
-// - maybe add method (*Queue).Peek()
 
 package fifo
 
@@ -110,4 +110,24 @@ func (q *Queue) Next() (item interface{}) {
 
 	// return the retrieved item
 	return item
+}
+
+// Return the item at the head of the queue without removing it
+// Returns nil when there are no items left in queue.
+func (q *Queue) Peek() (item interface{}) {
+	// locking to make Queue thread-safe
+	q.lock.Lock()
+	defer q.lock.Unlock()
+
+	// Return nil if there are no items to return
+	if q.count == 0 {
+		return nil
+	}
+	// FIXME: why would this check be required?
+	if q.head.first >= q.head.last {
+		return nil
+	}
+
+	// return the first item
+	return q.head.items[q.head.first]
 }
